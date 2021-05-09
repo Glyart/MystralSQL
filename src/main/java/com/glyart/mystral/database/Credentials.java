@@ -26,13 +26,12 @@ public class Credentials {
     @Nullable
     private String schema;
 
-    @NotNull
-    private final String poolName;
+    @Nullable
+    private String poolName;
 
-    protected Credentials(@NotNull String hostname, @NotNull String username, @NotNull String poolName) {
+    protected Credentials(@NotNull String hostname, @NotNull String username) {
         this.hostname = hostname;
         this.username = username;
-        this.poolName = poolName;
     }
     /**
      * Creates a new builder for Credentials.
@@ -91,7 +90,7 @@ public class Credentials {
      * Gets the name of the connection pool.
      * @return the name of the pool
      */
-    @NotNull
+    @Nullable
     public String getPoolName() {
         return poolName;
     }
@@ -172,9 +171,7 @@ public class Credentials {
          * @param poolName the name of the pool
          * @return this builder instance
          */
-        public CredentialsBuilder pool(@NotNull String poolName) {
-            Preconditions.checkArgument(!Preconditions.checkNotNull(poolName, "Pool name cannot be null.").isEmpty(),
-                    "Pool name cannot be empty.");
+        public CredentialsBuilder pool(@Nullable String poolName) {
             this.poolName = poolName;
             return this;
         }
@@ -187,11 +184,12 @@ public class Credentials {
          */
         @NotNull
         public Credentials build() {
-            Credentials credentials = new Credentials(hostname, username, poolName);
+            Credentials credentials = new Credentials(hostname, username);
 
             credentials.port = port;
             credentials.password = password;
             credentials.schema = schema;
+            credentials.poolName = poolName;
 
             return credentials;
         }

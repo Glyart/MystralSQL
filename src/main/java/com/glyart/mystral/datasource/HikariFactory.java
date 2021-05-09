@@ -149,6 +149,8 @@ public class HikariFactory implements DataSourceFactory<HikariDataSource> {
             hikariConfig.setJdbcUrl(String.format(TEMPLATE_URL, "mysql", credentials.getHostname(), credentials.getPort(), credentials.getSchema()));
             hikariConfig.setUsername(credentials.getUsername());
             hikariConfig.setPassword(credentials.getPassword());
+            if (credentials.getPoolName() != null)
+                hikariConfig.setPoolName(credentials.getPoolName());
         }
         PROPS.forEach(hikariConfig::addDataSourceProperty);
         hikariConfig.setMaximumPoolSize(MAXIMUM_POOL_SIZE);
