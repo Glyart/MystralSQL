@@ -2,7 +2,7 @@
 
 An efficient library to deal with relational databases quickly.
 
-A little request: read the Javadoc to understand how these elements work in deep.
+A little request: read the [Javadoc](https://glyart.github.io/Mystral/) to understand how these elements work in deep.
 
 ## Prerequisites
 This library requires Java 8.  
