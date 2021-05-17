@@ -136,7 +136,7 @@ public class HikariFactory implements DataSourceFactory<HikariDataSource> {
         if (key == null || val == null)
             return (T) this;
 
-        Preconditions.checkArgument(key.isEmpty(), "The key cannot be empty.");
+        Preconditions.checkArgument(!key.isEmpty(), "The key cannot be empty.");
 
         hikariConfig.addDataSourceProperty(key, val);
         return (T) this;
