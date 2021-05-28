@@ -1,8 +1,8 @@
 package com.glyart.mystral.sql.impl;
 
-import com.google.common.base.Preconditions;
-import com.glyart.mystral.sql.PreparedStatementSetter;
 import com.glyart.mystral.database.PreparedStatementUtils;
+import com.glyart.mystral.sql.PreparedStatementSetter;
+import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

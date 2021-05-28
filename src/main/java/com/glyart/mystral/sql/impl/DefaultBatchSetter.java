@@ -1,8 +1,8 @@
 package com.glyart.mystral.sql.impl;
 
-import com.google.common.base.Preconditions;
-import com.glyart.mystral.sql.BatchSetter;
 import com.glyart.mystral.database.PreparedStatementUtils;
+import com.glyart.mystral.sql.BatchSetter;
+import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;

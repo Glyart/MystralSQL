@@ -1,10 +1,10 @@
 package com.glyart.mystral.sql.impl;
 
-import com.google.common.base.Preconditions;
+import com.glyart.mystral.datasource.DataSourceUtils;
 import com.glyart.mystral.sql.ResultSetExtractor;
 import com.glyart.mystral.sql.SqlProvider;
 import com.glyart.mystral.sql.StatementFunction;
-import com.glyart.mystral.datasource.DataSourceUtils;
+import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

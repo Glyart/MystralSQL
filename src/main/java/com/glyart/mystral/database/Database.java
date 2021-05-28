@@ -1,5 +1,6 @@
 package com.glyart.mystral.database;
 
+import com.glyart.mystral.datasource.DataSourceSupplier;
 import com.glyart.mystral.datasource.DataSourceUtils;
 import com.glyart.mystral.exceptions.DataAccessException;
 import com.glyart.mystral.sql.*;
@@ -39,7 +40,7 @@ import java.util.List;
  * @see ResultSetRowMapper
  * @see StatementFunction
  */
-public class Database extends DatabaseAccessor implements DataOperations {
+public class Database extends DatabaseAccessor implements DataOperations, DataSourceSupplier {
 
     /**
      * Constructs a new Database object with the given {@link DataSource}.
@@ -75,8 +76,11 @@ public class Database extends DatabaseAccessor implements DataOperations {
     @Override
     public int update(@Language("MySQL") @NotNull String sql, boolean getGeneratedKeys) {
         Preconditions.checkNotNull(sql, "Sql statement cannot be null.");
-        UpdateStatementFunction updateStatementFunction = new UpdateStatementFunction(sql, getGeneratedKeys);
-        Object result = execute(updateStatementFunction);
+        if (getGeneratedKeys)
+            return update(sql, null, true);
+
+        SimpleUpdateStatementFunction simpleUpdateStatementFunction = new SimpleUpdateStatementFunction(sql);
+        Object result = execute(simpleUpdateStatementFunction);
         return result == null ? -1 : (int) result;
     }
 
@@ -307,5 +311,10 @@ public class Database extends DatabaseAccessor implements DataOperations {
             return null;
 
         return ((SqlProvider) o).getSql();
+    }
+
+    @Override
+    public @NotNull DataSource get() {
+        return getDataSource();
     }
 }

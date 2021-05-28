@@ -1,5 +1,6 @@
 package com.glyart.mystral.database;
 
+import com.glyart.mystral.datasource.DataSourceSupplier;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -15,8 +16,12 @@ public abstract class DatabaseAccessor {
     protected Logger logger;
 
     protected DatabaseAccessor(@NotNull DataSource dataSource) {
-        Preconditions.checkNotNull(dataSource, "The DataSource cannot be null.");
-        this.dataSource = dataSource;
+        this.dataSource = checkDataSource(dataSource);
+    }
+
+    protected DatabaseAccessor(@NotNull DataSourceSupplier supplier) {
+        Preconditions.checkNotNull(supplier, "The DataSourceSupplier cannot be null.");
+        this.dataSource = checkDataSource(supplier.get());
     }
 
     /**
@@ -35,5 +40,10 @@ public abstract class DatabaseAccessor {
     public void setLogger(@NotNull Logger logger) {
         Preconditions.checkNotNull(logger, "The logger cannot be null.");
         this.logger = logger;
+    }
+
+    private DataSource checkDataSource(DataSource dataSource) {
+        Preconditions.checkNotNull(dataSource, "The DataSource cannot be null.");
+        return dataSource;
     }
 }

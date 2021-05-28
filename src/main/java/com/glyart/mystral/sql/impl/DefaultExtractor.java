@@ -1,8 +1,8 @@
 package com.glyart.mystral.sql.impl;
 
+import com.glyart.mystral.sql.ResultSetExtractor;
 import com.glyart.mystral.sql.ResultSetRowMapper;
 import com.google.common.base.Preconditions;
-import com.glyart.mystral.sql.ResultSetExtractor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

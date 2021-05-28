@@ -1,14 +1,16 @@
 package com.glyart.mystral.database;
 
+import com.glyart.mystral.datasource.DataSourceSupplier;
+import com.glyart.mystral.exceptions.DataAccessException;
 import com.glyart.mystral.sql.*;
 import com.google.common.base.Preconditions;
-import com.glyart.mystral.exceptions.DataAccessException;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -70,25 +72,31 @@ public class AsyncDatabase implements AsyncDataOperations {
     }
 
     /**
-     * Returns the Database that wraps the given DataSource's instance.
+     * Returns the Database class instance which wraps the given DataSource's instance.<br>
+     * This method can return an empty Optional if the {@link #AsyncDatabase(DataOperations, Executor)}
+     * constructor is used to create a new instance of this class.
      * @return the {@link Database} (it can be used for synchronous operations).
      * @throws IllegalStateException if there is no {@link Database} available
+     * @see Optional
      */
-    @NotNull
-    public Database getDatabase() throws IllegalStateException {
-        Preconditions.checkState(operations instanceof Database, "No Database instance available.");
-        return (Database) operations;
+    public Optional<Database> getDatabase() {
+        return Optional.ofNullable(operations instanceof Database ? (Database) operations : null);
     }
 
     /**
-     * Returns the {@link DataSource} used by this {@link AsyncDatabase}'s instance.
+     * Returns an Optional instance containing the {@link DataSource} used by this {@link AsyncDatabase}'s instance.
+     * The AsyncDatabase class can obtain the DataSource from the {@link DataOperations} implementation.<br>
+     * If that implementation is neither an instance of {@link DataSourceSupplier} nor {@link DatabaseAccessor} then an empty
+     * Optional will be returned.
      * @return the DataSource
      * @throws IllegalStateException if there was a problem while trying to retrieve the {@link DataSource}'s instance
+     * @see Optional
      */
-    @NotNull
-    public DataSource getDataSource() {
-        Preconditions.checkState(operations instanceof DatabaseAccessor, "The provided implementation of DataOperations cannot supply its DataSource.");
-        return ((DatabaseAccessor) operations).getDataSource();
+    public Optional<DataSource> getDataSource() {
+        if (operations instanceof DataSourceSupplier)
+            return Optional.of(((DataSourceSupplier) operations).get());
+
+        return Optional.ofNullable(operations instanceof DatabaseAccessor ? ((DatabaseAccessor) operations).getDataSource() : null);
     }
 
     @Override

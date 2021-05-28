@@ -1,10 +1,10 @@
 package com.glyart.mystral.datasource;
 
-import com.glyart.mystral.exceptions.DataSourceInitException;
-import com.glyart.mystral.sql.AsyncDataOperations;
+import com.glyart.mystral.database.AsyncDatabase;
 import com.glyart.mystral.database.Credentials;
 import com.glyart.mystral.database.DatabaseAccessor;
 import com.glyart.mystral.exceptions.ConnectionRetrieveException;
+import com.glyart.mystral.exceptions.DataSourceInitException;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -128,10 +128,23 @@ public final class DataSourceUtils {
         DataSourceUtils.closePool(accessor.getDataSource());
     }
 
-    public static void closePool(@Nullable AsyncDataOperations asyncDataOperations) {
-        if (asyncDataOperations == null)
+    public static void closePool(@Nullable AsyncDatabase asyncDatabase) {
+        if (asyncDatabase == null)
             return;
 
-        DataSourceUtils.closePool(((DatabaseAccessor) asyncDataOperations).getDataSource());
+        asyncDatabase.getDataSource().ifPresent(DataSourceUtils::closePool);
+    }
+
+    public static void closePool(@Nullable Object o) {
+        if (o == null)
+            return;
+
+        if (o instanceof DataSourceSupplier) {
+            DataSourceUtils.closePool(((DataSourceSupplier) o).get());
+            return;
+        }
+
+        if (o instanceof DatabaseAccessor)
+            DataSourceUtils.closePool((DatabaseAccessor) o);
     }
 }
