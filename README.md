@@ -24,7 +24,7 @@ If you are working under __[Spigot API](https://www.spigotmc.org/wiki/index/)__,
     <dependency>
         <groupId>com.github.glyart</groupId>
         <artifactId>mystral</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
