@@ -1,4 +1,5 @@
-# Mystral
+# Mystral [![](https://jitpack.io/v/Glyart/Mystral.svg)](https://jitpack.io/#Glyart/Mystral)
+
 
 An efficient library to deal with relational databases quickly.
 
