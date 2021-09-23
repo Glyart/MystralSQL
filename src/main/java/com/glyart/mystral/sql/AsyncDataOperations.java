@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 /**
  * Represents a basic set of asynchronous operations to interact with a data source.
- * Every operations is done asynchronously by using {@link CompletableFuture} API.
+ * All operations are done asynchronously by using {@link CompletableFuture} API.
  * <p>If you want to re-implement this interface consider to use the {@link Executor} interface.</p>
  * @see AsyncDatabase
  */
@@ -156,8 +156,7 @@ public interface AsyncDataOperations {
     CompletableFuture<Integer> update(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) throws DataAccessException;
 
     /**
-     * Performs a single update operation (like insert, delete, update) using a {@link PreparedStatementCreator} to
-     * to provide SQL and any required parameters.
+     * Performs a single update operation (like insert, delete, update) using a {@link PreparedStatementCreator} to provide SQL and any required parameters.
      * @param creator a callback that provides the PreparedStatement with required parameters
      * @param getGeneratedKeys a boolean values
      * @return a never null CompletableFuture object which holds: the number of the affected rows.
@@ -263,7 +262,7 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<List<T>> query(@NotNull PreparedStatementCreator psc, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException;
 
     /**
-     * Executes a query using a SQL statement, then reading the ResultSet with a {@link ResultSetExtractor} implementation.
+     * Executes a query using an SQL statement, then reading the ResultSet with a {@link ResultSetExtractor} implementation.
      * @param sql the query to execute
      * @param setter a callback that sets values on the PreparedStatement. If null, the SQL will be treated as static SQL with no bind parameters
      * @param extractor a callback that will extract results given a ResultSet
@@ -274,8 +273,8 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException;
 
     /**
-     * Executes a query using a SQL statement and a {@link PreparedStatementSetter} implementation that will bind values to the query.
-     * Each row of the ResultSet will be map to a result object via a ResultSetRowMapper implementation.
+     * Executes a query using an SQL statement and a {@link PreparedStatementSetter} implementation that will bind values to the query.
+     * Each row of the ResultSet will be mapped to a result object via a ResultSetRowMapper implementation.
      * @param sql the query to execute
      * @param pss a callback that sets values on the PreparedStatement. If null, the SQL will be treated as static SQL with no bind parameters
      * @param resultSetRowMapper a callback that will map one object per ResultSet row
@@ -286,7 +285,7 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<List<T>> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter pss, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments will be bound to the query.
      * The {@link ResultSetExtractor} implementation will read the ResultSet.
      * @param sql the query to execute
@@ -299,7 +298,7 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * The {@link ResultSetExtractor} implementation will read the ResultSet.
      * @param sql the query to execute
@@ -314,7 +313,7 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, int... sqlTypes) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * The {@link ResultSetExtractor} implementation will read the ResultSet.<br>
      * <p>If a {@code null} result is returned, then the given supplier will be invoked, supplying the specified result (it can be null) inside the CompletableFuture.</p>
@@ -332,9 +331,9 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<T> queryOrElseGet(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, Supplier<T> supplier, int... sqlTypes) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments will be bound to the query.
-     * Each row of the ResultSet will be map to a result object via a {@link ResultSetRowMapper} implementation.
+     * Each row of the ResultSet will be mapped to a result object via a {@link ResultSetRowMapper} implementation.
      * @param sql the query to execute
      * @param args arguments to bind to the query
      * @param resultSetRowMapper a callback that will map one object per ResultSet row
@@ -345,9 +344,9 @@ public interface AsyncDataOperations {
     <T> CompletableFuture<List<T>> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
-     * Each row of the ResultSet will be map to a result object via a {@link ResultSetRowMapper} implementation.
+     * Each row of the ResultSet will be mapped to a result object via a {@link ResultSetRowMapper} implementation.
      * @param sql the query to execute
      * @param args arguments to bind to the query
      * @param resultSetRowMapper a callback that will map one object per ResultSet row
@@ -361,7 +360,7 @@ public interface AsyncDataOperations {
                                                 @NotNull ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * Each row of the ResultSet will be mapped to a result object via a {@link ResultSetRowMapper} implementation.<br>
      * <b>If a {@code null} collection is returned, then the given supplier will be invoked, supplying the specified list (it can be null) inside the CompletableFuture.</b>
@@ -380,7 +379,7 @@ public interface AsyncDataOperations {
                                                          @NotNull ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<List<T>> supplier, int... sqlTypes);
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments will be bound to the query.
      * <p>The first ResultSet row will be mapped to a result object using the {@link ResultSetRowMapper} implementation.</p>
      * The ResultSet must have exactly ONE row.
@@ -388,14 +387,14 @@ public interface AsyncDataOperations {
      * @param args arguments to bind to the query
      * @param resultSetRowMapper a callback that will map one object per ResultSet row
      * @param <T> the result type
-     * @return a never null CompletableFuture object which holds: a mapped result object (if it exist)
+     * @return a never null CompletableFuture object which holds: a mapped result object (if it exists)
      * @throws DataAccessException if there is any problem
      * @throws IncorrectDataSizeException if the query doesn't return exactly one result
      */
     <T> CompletableFuture<T> queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException, IncorrectDataSizeException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * <p>The first ResultSet row will be mapped to a result object using the {@link ResultSetRowMapper} implementation.</p>
      * The ResultSet must have exactly ONE row.
@@ -404,14 +403,14 @@ public interface AsyncDataOperations {
      * @param resultSetRowMapper a callback that will map one object per ResultSet row
      * @param sqlTypes an integer array containing the type of the query's parameters, expressed as {@link java.sql.Types}
      * @param <T> the result type
-     * @return a never null CompletableFuture object which holds: a mapped result object (if it exist)
+     * @return a never null CompletableFuture object which holds: a mapped result object (if it exists)
      * @throws DataAccessException if there is any problem
      * @see Types
      */
     <T> CompletableFuture<T> queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException;
 
     /**
-     * Executes a query given a SQL statement: it will be used to create a PreparedStatement.
+     * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * <p>The first ResultSet row will be mapped to a result object using the {@link ResultSetRowMapper} implementation.</p>
      * The ResultSet mustn't have more ONE row.

@@ -3,7 +3,7 @@ package com.glyart.mystral.exceptions;
 import com.glyart.mystral.datasource.DataSourceFactory;
 
 /**
- * Describes a problem occured while trying to create a DataSource.
+ * Describes a problem occurred while trying to create a DataSource.
  * @see DataSourceFactory
  */
 public class DataSourceInitException extends RuntimeException {
