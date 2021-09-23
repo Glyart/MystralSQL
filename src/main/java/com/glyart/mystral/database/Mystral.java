@@ -23,6 +23,7 @@ public final class Mystral {
      * @throws DataSourceInitException if something went wrong
      * @see Database
      * @see Credentials
+     * @see DataSourceFactory#newDataSource()
      */
     @NotNull
     public static Database newDatabase(@NotNull Credentials credentials) throws DataSourceInitException {
@@ -36,6 +37,7 @@ public final class Mystral {
      * @return the Database
      * @throws DataSourceInitException if something went wrong
      * @see DataSourceFactory
+     * @see DataSourceFactory#newDataSource()
      */
     @NotNull
     public static <T extends DataSource> Database newDatabase(@NotNull DataSourceFactory<T> factory) throws DataSourceInitException {
@@ -55,6 +57,7 @@ public final class Mystral {
      * @throws DataSourceInitException if something went wrong
      * @see AsyncDatabase
      * @see Executor
+     * @see DataSourceFactory#newDataSource()
      */
     @NotNull
     public static AsyncDatabase newAsyncDatabase(@NotNull Credentials credentials, @NotNull Executor executor) throws DataSourceInitException {
@@ -69,6 +72,7 @@ public final class Mystral {
      * @param <T> the DataSource type
      * @return the AsyncDatabase
      * @throws DataSourceInitException if something went wrong
+     * @see DataSourceFactory#newDataSource()
      */
     @NotNull
     public static <T extends DataSource> AsyncDatabase newAsyncDatabase(@NotNull DataSourceFactory<T> factory, @NotNull Executor executor) throws DataSourceInitException {

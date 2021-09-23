@@ -24,17 +24,28 @@ public class DefaultExtractor<T> implements ResultSetExtractor<List<T>> {
     public DefaultExtractor(@NotNull ResultSetRowMapper<T> mapper, int limit) {
         Preconditions.checkNotNull(mapper, "ResultSetRowMapper cannot be null.");
         this.mapper = mapper;
-        this.limit = limit;
+        this.limit = Math.abs(limit);
     }
 
     @Nullable
     @Override
     public List<T> extractData(@NotNull ResultSet rs) throws SQLException {
-        List<T> list = limit == 0 ? new ArrayList<>() : new ArrayList<>(Math.abs(limit));
+        if (!rs.next()) {
+            return null;
+        }
+        List<T> list = new ArrayList<>();
         int rowNum = 0;
-        while (rs.next())
-            list.add(mapper.map(rs, rowNum++));
+        list.add(mapper.map(rs, rowNum++));
+        if (rowNum == limit) {
+            return list;
+        }
 
+        while (rs.next()) {
+            if (rowNum == limit) {
+                break;
+            }
+            list.add(mapper.map(rs, rowNum++));
+        }
         return list;
     }
 }

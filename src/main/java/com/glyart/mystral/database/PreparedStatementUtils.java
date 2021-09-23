@@ -50,32 +50,38 @@ public final class PreparedStatementUtils {
                 if (isStringValue(value.getClass())) {
                     String stringValue = value.toString();
                     if (stringValue.length() > CLOB_LENGTH) {
-                        if (sqlType == Types.NCLOB)
+                        if (sqlType == Types.NCLOB) {
                             statement.setNClob(paramIndex, new StringReader(stringValue), stringValue.length());
-                        else
+                        }
+                        else {
                             statement.setClob(paramIndex, new StringReader(stringValue), stringValue.length());
+                        }
                     } else {
-                        if (sqlType == Types.NCLOB)
+                        if (sqlType == Types.NCLOB) {
                             statement.setNString(paramIndex, stringValue);
-                        else
+                        }
+                        else {
                             statement.setString(paramIndex, stringValue);
+                        }
                     }
                 }
                 break;
             case Types.DECIMAL:
             case Types.NUMERIC:
-                if (value instanceof BigDecimal)
+                if (value instanceof BigDecimal) {
                     statement.setBigDecimal(paramIndex, (BigDecimal) value);
-                else
+                }
+                else {
                     statement.setObject(paramIndex, value, sqlType);
-
+                }
                 break;
             case Types.BOOLEAN:
-                if (value instanceof Boolean)
+                if (value instanceof Boolean) {
                     statement.setBoolean(paramIndex, (Boolean) value);
-                else
+                }
+                else {
                     statement.setObject(paramIndex, value, Types.BOOLEAN);
-
+                }
                 break;
             case Types.DATE:
                 if (value instanceof java.util.Date) {
@@ -88,24 +94,26 @@ public final class PreparedStatementUtils {
                     Calendar cal = (Calendar) value;
                     statement.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
                 }
-                else
+                else {
                     statement.setObject(paramIndex, value, Types.DATE);
-
+                }
                 break;
             case Types.TIME:
                 if (value instanceof java.util.Date) {
-                    if (value instanceof java.sql.Time)
+                    if (value instanceof java.sql.Time) {
                         statement.setTime(paramIndex, (java.sql.Time) value);
-                    else
+                    }
+                    else {
                         statement.setTime(paramIndex, new java.sql.Time(((java.util.Date) value).getTime()));
+                    }
                 }
                 else if (value instanceof Calendar) {
                     Calendar cal = (Calendar) value;
                     statement.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
                 }
-                else
+                else {
                     statement.setObject(paramIndex, value, Types.TIME);
-
+                }
                 break;
             case Types.TIMESTAMP:
                 if (value instanceof java.util.Date) {

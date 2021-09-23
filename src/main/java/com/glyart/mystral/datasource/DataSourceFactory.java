@@ -1,9 +1,12 @@
 package com.glyart.mystral.datasource;
 
+import com.glyart.mystral.database.Credentials;
+import com.glyart.mystral.database.Mystral;
 import com.glyart.mystral.exceptions.DataSourceInitException;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
+import java.util.concurrent.Executor;
 
 /**
  * Convenient interface for lazily creating {@link DataSource} objects.
@@ -28,7 +31,9 @@ public interface DataSourceFactory<T extends DataSource> {
     /**
      * If ready, a new DataSource is created with its configuration.
      * @return the DataSource
-     * @throws DataSourceInitException if something went wrong
+     * @throws DataSourceInitException if something went wrong. <br>
+     * This method doesn't need to throw a {@link java.sql.SQLException}. <br>
+     * Further explanations can be found <a href=https://github.com/Glyart/Mystral/issues/4>here</a>.
      */
     @NotNull
     T newDataSource() throws DataSourceInitException;
