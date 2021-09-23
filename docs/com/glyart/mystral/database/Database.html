@@ -1490,7 +1490,7 @@ public&nbsp;&lt;T&gt;&nbsp;T&nbsp;queryForObjectOrElseGet(@NotNull
 <div class="block">Executes a query given an SQL statement: it will be used to create a PreparedStatement.
  Then a list of arguments with their sql <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/Types.html?is-external=true" title="class or interface in java.sql"><code>Types</code></a> will be bound to the query.
  <p>The first ResultSet row will be mapped to a result object using the <a href="../../../../com/glyart/mystral/sql/ResultSetRowMapper.html" title="interface in com.glyart.mystral.sql"><code>ResultSetRowMapper</code></a> implementation.</p>
- The ResultSet mustn't have more ONE row.
+ The ResultSet mustn't have more than ONE row.
  <p>If a <code>null</code> result is returned, then the given supplier will be invoked, supplying the specified result (it can be null).</p></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>

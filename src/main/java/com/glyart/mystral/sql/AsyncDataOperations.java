@@ -413,7 +413,7 @@ public interface AsyncDataOperations {
      * Executes a query given an SQL statement: it will be used to create a PreparedStatement.
      * Then a list of arguments with their sql {@link Types} will be bound to the query.
      * <p>The first ResultSet row will be mapped to a result object using the {@link ResultSetRowMapper} implementation.</p>
-     * The ResultSet mustn't have more ONE row.
+     * The ResultSet mustn't have more than ONE row.
      * <p>If a {@code null} result is returned, then the given supplier will be invoked, supplying the specified result (it can be null).</p>
      * @param sql the query to execute
      * @param args arguments to bind to the query
