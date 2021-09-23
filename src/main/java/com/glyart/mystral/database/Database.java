@@ -314,19 +314,19 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
 
     @Override
     public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException, IncorrectDataSizeException {
-        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1));
+        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper));
         return DataUtils.nullableSingleResult(resultList);
     }
 
     @Override
     public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException, IncorrectDataSizeException {
-        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1), sqlTypes);
+        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper), sqlTypes);
         return DataUtils.nullableSingleResult(resultList);
     }
 
     @Nullable
     public <T> T queryForObjectOrElseGet(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<T> supplier, int... sqlTypes) throws DataAccessException, IncorrectDataSizeException {
-        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1), sqlTypes);
+        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper), sqlTypes);
         T result = DataUtils.nullableEmptyResult(resultList);
         return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
     }
