@@ -1,8 +1,10 @@
 package com.glyart.mystral.database;
 
+import com.glyart.mystral.data.DataUtils;
 import com.glyart.mystral.datasource.DataSourceSupplier;
 import com.glyart.mystral.datasource.DataSourceUtils;
 import com.glyart.mystral.exceptions.DataAccessException;
+import com.glyart.mystral.exceptions.IncorrectDataSizeException;
 import com.glyart.mystral.sql.*;
 import com.glyart.mystral.sql.impl.*;
 import com.google.common.base.Preconditions;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Represents implementation of basic synchronous operations for interacting with a data source.
@@ -25,7 +28,7 @@ import java.util.List;
  *     <li>executes all the <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a> operations on a data source</li>
  *     <li>handles exceptions and communicates the sql that generated the problem (if possible)</li>
  *     <li>gives <b>nullable results</b></li>
- *     <li>iterates over {@link java.sql.ResultSet}s</li>
+ *     <li>iterates over {@link ResultSet}s</li>
  *     <li>deals with static and prepared statements</li>
  * </ul>
  *
@@ -74,7 +77,7 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public int update(@Language("MySQL") @NotNull String sql, boolean getGeneratedKeys) {
+    public int update(@Language("MySQL") @NotNull String sql, boolean getGeneratedKeys) throws DataAccessException {
         Preconditions.checkNotNull(sql, "Sql statement cannot be null.");
         if (getGeneratedKeys)
             return update(sql, null, true);
@@ -85,29 +88,42 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public <T> T query(@Language("MySQL") @NotNull String sql, ResultSetExtractor<T> extractor) {
+    public <T> T query(@Language("MySQL") @NotNull String sql, ResultSetExtractor<T> extractor) throws DataAccessException {
         return execute(new QueryStatementFunction<>(extractor, sql));
     }
 
     @Override
-    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) {
-        return query(sql, new DefaultExtractor<>(resultSetRowMapper));
+    public <T> T queryOrElseGet(@Language("MySQL") @NotNull String sql, ResultSetExtractor<T> extractor, @NotNull Supplier<T> supplier) throws DataAccessException  {
+        T result = execute(new QueryStatementFunction<>(extractor, sql));
+        return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
     }
 
     @Override
-    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) {
-        List<T> resultList = query(sql, new DefaultExtractor<>(resultSetRowMapper, 1));
-        T result = resultList == null || resultList.isEmpty() ? null : resultList.get(0);
-        if (result == null)
-            logger.warn("queryForObject(String, ResultSetRowMapper) was invoked but a single object was not returned.");
+    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
+        return query(sql, new DefaultExtractor<>(resultSetRowMapper));
+    }
 
-        return result;
+    public <T> List<T> queryForListOrElseGet(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<List<T>> supplier) throws DataAccessException {
+        List<T> resultList = query(sql, new DefaultExtractor<>(resultSetRowMapper));
+        return resultList != null ? resultList : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
+    }
+
+    @Override
+    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException, IncorrectDataSizeException {
+        List<T> resultList = query(sql, new DefaultExtractor<>(resultSetRowMapper));
+        return DataUtils.nullableSingleResult(resultList);
+    }
+
+    public <T> T queryForObjectOrElseGet(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<T> supplier) throws DataAccessException, IncorrectDataSizeException {
+        List<T> resultList = query(sql, new DefaultExtractor<>(resultSetRowMapper));
+        T result = DataUtils.nullableEmptyResult(resultList);
+        return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
     }
 
     // Prepared statements
 
     @Override
-    public <T> T execute(@NotNull PreparedStatementCreator creator, @NotNull PreparedStatementFunction<T> callback) {
+    public <T> T execute(@NotNull PreparedStatementCreator creator, @NotNull PreparedStatementFunction<T> callback) throws DataAccessException {
         Preconditions.checkNotNull(creator, "PreparedStatementCreator cannot be null.");
         Preconditions.checkNotNull(callback, "PreparedStatementFunction cannot be null.");
         Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -132,12 +148,12 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public <T> T execute(@Language("MySQL") @NotNull String sql, @NotNull PreparedStatementFunction<T> callback) {
+    public <T> T execute(@Language("MySQL") @NotNull String sql, @NotNull PreparedStatementFunction<T> callback) throws DataAccessException {
         return execute(new DefaultCreator(sql), callback);
     }
 
     @Override
-    public int update(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) {
+    public int update(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) throws DataAccessException {
         PreparedStatementFunction<Integer> function = ps -> {
             ResultSet set = null;
             int rows;
@@ -161,17 +177,17 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public int update(@NotNull PreparedStatementCreator creator, boolean getGeneratedKeys) {
+    public int update(@NotNull PreparedStatementCreator creator, boolean getGeneratedKeys) throws DataAccessException {
         return update(creator, null, getGeneratedKeys);
     }
 
     @Override
-    public int update(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) {
+    public int update(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) throws DataAccessException {
         return update(new DefaultCreator(sql, getGeneratedKey), setter, getGeneratedKey);
     }
 
     @Override
-    public int update(@Language("MySQL") @NotNull String sql, Object[] params, boolean getGeneratedKey, int... sqlTypes) {
+    public int update(@Language("MySQL") @NotNull String sql, Object[] params, boolean getGeneratedKey, int... sqlTypes) throws DataAccessException {
         return update(sql, new DefaultSetter(params, sqlTypes), getGeneratedKey);
     }
 
@@ -225,7 +241,7 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public <T> T query(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) {
+    public <T> T query(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
         Preconditions.checkNotNull(extractor, "ResultSetExtractor cannot be null.");
 
         return execute(creator, ps -> {
@@ -245,22 +261,22 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public <T> T query(@NotNull PreparedStatementCreator creator, @NotNull ResultSetExtractor<T> extractor) {
+    public <T> T query(@NotNull PreparedStatementCreator creator, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
         return query(creator, null, extractor);
     }
 
     @Override
-    public <T> List<T> query(@NotNull PreparedStatementCreator psc, @NotNull ResultSetRowMapper<T> resultSetRowMapper) {
+    public <T> List<T> query(@NotNull PreparedStatementCreator psc, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
         return query(psc, new DefaultExtractor<>(resultSetRowMapper));
     }
 
     @Override
-    public <T> T query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) {
+    public <T> T query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
         return query(new DefaultCreator(sql), setter, extractor);
     }
 
     @Override
-    public <T> List<T> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter pss, @NotNull ResultSetRowMapper<T> resultSetRowMapper) {
+    public <T> List<T> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter pss, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
         return query(sql, pss, new DefaultExtractor<>(resultSetRowMapper));
     }
 
@@ -270,39 +286,49 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     }
 
     @Override
-    public <T> T query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, int... sqlTypes) {
+    public <T> T query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, int... sqlTypes) throws DataAccessException {
         return query(sql, new DefaultSetter(args, sqlTypes), extractor);
     }
 
     @Override
-    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) {
+    public <T> T queryOrElseGet(@NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, Supplier<T> supplier, int... sqlTypes) throws DataAccessException {
+        T result = query(sql, args, extractor, sqlTypes);
+        return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
+    }
+
+    @Override
+    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
         return query(sql, args, new DefaultExtractor<>(resultSetRowMapper));
     }
 
     @Override
-    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) {
+    public <T> List<T> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException {
         return query(sql, args, new DefaultExtractor<>(resultSetRowMapper), sqlTypes);
     }
 
-    @Override
-    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) {
-        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1));
-        return nullableResult(resultList, "queryForObject(String, Object[], ResultSetRowMapper) was invoked but a single object was not returned.");
+    @NotNull
+    public <T> List<T> queryForListOrElseGet(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<List<T>> supplier, int... sqlTypes) throws DataAccessException {
+        List<T> result = queryForList(sql, args, resultSetRowMapper, sqlTypes);
+        return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
     }
 
     @Override
-    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) {
+    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException, IncorrectDataSizeException {
+        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1));
+        return DataUtils.nullableSingleResult(resultList);
+    }
+
+    @Override
+    public <T> T queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException, IncorrectDataSizeException {
         List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1), sqlTypes);
-        return nullableResult(resultList, "queryForObject(String, Object[], int[], ResultSetRowMapper) was invoked but a single object was not returned.");
+        return DataUtils.nullableSingleResult(resultList);
     }
 
     @Nullable
-    private <T> T nullableResult(List<T> resultList, String msg) {
-        T result = resultList.isEmpty() ? null : resultList.get(0);
-        if (resultList.size() != 1)
-            logger.warn(msg);
-
-        return result;
+    public <T> T queryForObjectOrElseGet(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<T> supplier, int... sqlTypes) throws DataAccessException, IncorrectDataSizeException {
+        List<T> resultList = query(sql, args, new DefaultExtractor<>(resultSetRowMapper, 1), sqlTypes);
+        T result = DataUtils.nullableEmptyResult(resultList);
+        return result != null ? result : Preconditions.checkNotNull(supplier, "The Supplier cannot be null").get();
     }
 
     @Nullable

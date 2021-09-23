@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
+
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 /**
  * Represents implementation of basic asynchronous operations for interacting with a data source.
@@ -101,126 +105,156 @@ public class AsyncDatabase implements AsyncDataOperations {
 
     @Override
     public <T> CompletableFuture<T> execute(@NotNull StatementFunction<T> callback) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.execute(callback), executor);
+        return supplyAsync(() -> operations.execute(callback), executor);
     }
 
     @Override
     public CompletableFuture<Integer> update(@Language("MySQL") @NotNull String sql, boolean getGeneratedKeys) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.update(sql, getGeneratedKeys), executor);
+        return supplyAsync(() -> operations.update(sql, getGeneratedKeys), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, ResultSetExtractor<T> extractor) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(sql, extractor), executor);
+        return supplyAsync(() -> operations.query(sql, extractor), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> queryOrElseGet(@NotNull String sql, ResultSetExtractor<T> extractor, @NotNull Supplier<T> supplier) {
+        return supplyAsync(() -> operations.queryOrElseGet(sql, extractor, supplier), executor);
     }
 
     @Override
     public <T> CompletableFuture<List<T>> queryForList(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForList(sql, resultSetRowMapper), executor);
+        return supplyAsync(() -> operations.queryForList(sql, resultSetRowMapper), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> queryForListOrElseGet(@NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<List<T>> supplier) {
+        return supplyAsync(() -> operations.queryForListOrElseGet(sql, resultSetRowMapper, supplier));
     }
 
     @Override
     public <T> CompletableFuture<T> queryForObject(@Language("MySQL") @NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForObject(sql, resultSetRowMapper), executor);
+        return supplyAsync(() -> operations.queryForObject(sql, resultSetRowMapper), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> queryForObjectOrElseGet(@NotNull String sql, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<T> supplier) {
+        return supplyAsync(() -> operations.queryForObjectOrElseGet(sql, resultSetRowMapper, supplier), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> execute(@NotNull PreparedStatementCreator creator, @NotNull PreparedStatementFunction<T> callback) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.execute(creator, callback), executor);
+        return supplyAsync(() -> operations.execute(creator, callback), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> execute(@Language("MySQL") @NotNull String sql, @NotNull PreparedStatementFunction<T> callback) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.execute(sql, callback), executor);
+        return supplyAsync(() -> operations.execute(sql, callback), executor);
     }
 
     @Override
     public CompletableFuture<Integer> update(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.update(creator, setter, getGeneratedKey), executor);
+        return supplyAsync(() -> operations.update(creator, setter, getGeneratedKey), executor);
     }
 
     @Override
     public CompletableFuture<Integer> update(@NotNull PreparedStatementCreator creator, boolean getGeneratedKeys) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.update(creator, getGeneratedKeys), executor);
+        return supplyAsync(() -> operations.update(creator, getGeneratedKeys), executor);
     }
 
     @Override
     public CompletableFuture<Integer> update(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, boolean getGeneratedKey) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.update(sql, setter, getGeneratedKey), executor);
+        return supplyAsync(() -> operations.update(sql, setter, getGeneratedKey), executor);
     }
 
     @Override
     public CompletableFuture<Integer> update(@Language("MySQL") @NotNull String sql, Object[] params, boolean getGeneratedKey, int... sqlTypes) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.update(sql, params, getGeneratedKey, sqlTypes), executor);
+        return supplyAsync(() -> operations.update(sql, params, getGeneratedKey, sqlTypes), executor);
     }
 
     @Override
     public CompletableFuture<Void> batchUpdate(@Language("MySQL") @NotNull String sql, @NotNull BatchSetter batchSetter) throws IllegalStateException {
-        return CompletableFuture.runAsync(() -> operations.batchUpdate(sql, batchSetter), executor);
+        return runAsync(() -> operations.batchUpdate(sql, batchSetter), executor);
     }
 
     @Override
     public CompletableFuture<Void> batchUpdate(@Language("MySQL") @NotNull String sql, @Nullable List<Object[]> batchArgs, int... sqlTypes) throws IllegalStateException {
-        return CompletableFuture.runAsync(() -> operations.batchUpdate(sql, batchArgs, sqlTypes), executor);
+        return runAsync(() -> operations.batchUpdate(sql, batchArgs, sqlTypes), executor);
     }
 
     @Override
     public <T> CompletableFuture<Void> batchUpdate(@Language("MySQL") @NotNull String sql, @Nullable List<T> batchArgs, @NotNull ParametrizedBatchSetter<T> paramsBatchSetter) throws IllegalStateException {
-        return CompletableFuture.runAsync(() -> operations.batchUpdate(sql, batchArgs, paramsBatchSetter), executor);
+        return runAsync(() -> operations.batchUpdate(sql, batchArgs, paramsBatchSetter), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@NotNull PreparedStatementCreator creator, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(creator, setter, extractor), executor);
+        return supplyAsync(() -> operations.query(creator, setter, extractor), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@NotNull PreparedStatementCreator creator, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(creator, extractor), executor);
+        return supplyAsync(() -> operations.query(creator, extractor), executor);
     }
 
     @Override
     public <T> CompletableFuture<List<T>> query(@NotNull PreparedStatementCreator psc, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(psc, resultSetRowMapper), executor);
+        return supplyAsync(() -> operations.query(psc, resultSetRowMapper), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter setter, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(sql, setter, extractor), executor);
+        return supplyAsync(() -> operations.query(sql, setter, extractor), executor);
     }
 
     @Override
     public <T> CompletableFuture<List<T>> query(@Language("MySQL") @NotNull String sql, @Nullable PreparedStatementSetter pss, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(sql, pss, resultSetRowMapper));
+        return supplyAsync(() -> operations.query(sql, pss, resultSetRowMapper), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(sql, args, extractor));
+        return supplyAsync(() -> operations.query(sql, args, extractor), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> query(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, int... sqlTypes) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.query(sql, args, extractor, sqlTypes), executor);
+        return supplyAsync(() -> operations.query(sql, args, extractor, sqlTypes), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> queryOrElseGet(@NotNull String sql, @Nullable Object[] args, @NotNull ResultSetExtractor<T> extractor, Supplier<T> supplier, int... sqlTypes) throws DataAccessException {
+        return supplyAsync(() -> operations.queryOrElseGet(sql, args, extractor, supplier, sqlTypes), executor);
     }
 
     @Override
     public <T> CompletableFuture<List<T>> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForList(sql, args, resultSetRowMapper), executor);
+        return supplyAsync(() -> operations.queryForList(sql, args, resultSetRowMapper), executor);
     }
 
     @Override
     public <T> CompletableFuture<List<T>> queryForList(@Language("MySQL") @NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForList(sql, args, resultSetRowMapper, sqlTypes), executor);
+        return supplyAsync(() -> operations.queryForList(sql, args, resultSetRowMapper, sqlTypes), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> queryForListOrElseGet(@NotNull String sql, @Nullable Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<List<T>> supplier, int... sqlTypes) {
+        return supplyAsync(() -> operations.queryForListOrElseGet(sql, args, resultSetRowMapper, supplier, sqlTypes), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, @NotNull ResultSetRowMapper<T> resultSetRowMapper) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForObject(sql, args, resultSetRowMapper), executor);
+        return supplyAsync(() -> operations.queryForObject(sql, args, resultSetRowMapper), executor);
     }
 
     @Override
     public <T> CompletableFuture<T> queryForObject(@Language("MySQL") @NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, int... sqlTypes) throws DataAccessException {
-        return CompletableFuture.supplyAsync(() -> operations.queryForObject(sql, args, resultSetRowMapper, sqlTypes), executor);
+        return supplyAsync(() -> operations.queryForObject(sql, args, resultSetRowMapper, sqlTypes), executor);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> queryForObjectOrElseGet(@NotNull String sql, Object[] args, ResultSetRowMapper<T> resultSetRowMapper, @NotNull Supplier<T> supplier, int... sqlTypes) {
+        return supplyAsync(() -> operations.queryForObjectOrElseGet(sql, args, resultSetRowMapper, supplier, sqlTypes), executor);
     }
 }
