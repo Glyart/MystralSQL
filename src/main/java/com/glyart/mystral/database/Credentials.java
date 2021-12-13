@@ -184,7 +184,7 @@ public class Credentials {
          */
         @NotNull
         public Credentials build() {
-            Credentials credentials = new Credentials(hostname, username);
+            var credentials = new Credentials(hostname, username);
 
             credentials.port = port;
             credentials.password = password;

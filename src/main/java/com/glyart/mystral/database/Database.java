@@ -126,7 +126,7 @@ public class Database extends DatabaseAccessor implements DataOperations, DataSo
     public <T> T execute(@NotNull PreparedStatementCreator creator, @NotNull PreparedStatementFunction<T> callback) throws DataAccessException {
         Preconditions.checkNotNull(creator, "PreparedStatementCreator cannot be null.");
         Preconditions.checkNotNull(callback, "PreparedStatementFunction cannot be null.");
-        Connection connection = DataSourceUtils.getConnection(dataSource);
+        var connection = DataSourceUtils.getConnection(dataSource);
         if (connection == null) {
             logger.warn("Cannot retrieve a connection.");
             return null;
