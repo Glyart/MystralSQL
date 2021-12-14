@@ -15,10 +15,10 @@
 -docencoding
 'UTF-8'
 -doctitle
-'Mystral 1.4.3-SNAPSHOT API'
+'Mystral 1.4.4-SNAPSHOT API'
 -linkoffline
 'https://docs.oracle.com/javase/8/docs/api' 'F:/Idea/Mystral/target/javadoc-bundle-options'
 -use
 -version
 -windowtitle
-'Mystral 1.4.3-SNAPSHOT API'
+'Mystral 1.4.4-SNAPSHOT API'
