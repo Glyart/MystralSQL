@@ -12,6 +12,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -125,11 +126,11 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
     @Override
     @Nullable
     public T map(@NotNull ResultSet resultSet, int rowNumber) throws SQLException {
-        var bean = newInstance(target);
+        T bean = newInstance(target);
 
-        var descriptors = getDescriptors(target);
-        var metaData = resultSet.getMetaData();
-        var columnCount = metaData.getColumnCount();
+        PropertyDescriptor[] descriptors = getDescriptors(target);
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        int columnCount = metaData.getColumnCount();
         assignColumnToProperty(metaData, descriptors, columnCount);
 
         for (int i = 1; i <= columnCount; i++) {
@@ -192,12 +193,12 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
     }
 
     protected void setValue(T bean, PropertyDescriptor descriptor, Object value) throws TypeMismatchException {
-        var setter = descriptor.getWriteMethod();
+        Method setter = descriptor.getWriteMethod();
         if (setter == null || setter.getParameterCount() != 1) {
             return;
         }
 
-        var setterParam = setter.getParameterTypes()[0];
+        Class<?> setterParam = setter.getParameterTypes()[0];
         if (value == null && setterParam.isPrimitive()) {
             if (defaultNullValueForPrimitives) {
                 value = PRIMITIVE_TYPES.get(setterParam);
@@ -206,7 +207,7 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
             }
         }
 
-        var converter = retrieveConverter(setter);
+        Converter<Object, Object> converter = retrieveConverter(setter);
 
         if (converter != null) {
             value = converter.apply(value);
@@ -229,12 +230,12 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
             String columnName = DataSourceUtils.getColumnName(metaData, i);
 
             for (PropertyDescriptor descriptor : descriptors) {
-                final var method = descriptor.getWriteMethod();
+                final Method method = descriptor.getWriteMethod();
                 if (method == null) {
                     continue;
                 }
-                var propertyName = descriptor.getName();
-                final var name = method.getAnnotation(Name.class);
+                String propertyName = descriptor.getName();
+                final Name name = method.getAnnotation(Name.class);
                 if (name != null) {
                     propertyName = name.columnName();
                 }
@@ -256,8 +257,8 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
         }
 
         try {
-            final var typeField = valueType.getField("TYPE");
-            final var primitiveValueType = typeField.get(valueType);
+            final Field typeField = valueType.getField("TYPE");
+            final Object primitiveValueType = typeField.get(valueType);
 
             if (targetType == primitiveValueType) {
                 return true;
@@ -275,8 +276,8 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
             return null;
         }
 
-        var converterClass = (Class<Converter<Object, Object>>) mapWith.value();
-        var converter = converterMap.get(converterClass);
+        Class<Converter<Object, Object>> converterClass = (Class<Converter<Object, Object>>) mapWith.value();
+        Converter<Object, Object> converter = converterMap.get(converterClass);
 
         if (converter == null) {
             try {
@@ -291,15 +292,15 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
 
     @Nullable
     protected MapWith retrieveAnnotations(Method method) {
-        var annotations = method.getParameterAnnotations();
+        Annotation[][] annotations = method.getParameterAnnotations();
         if (annotations.length == 0) {
             return null;
         }
 
-        var paramAnnotations = annotations[0];
+        Annotation[] paramAnnotations = annotations[0];
         for (Annotation a : paramAnnotations) {
-            if (a instanceof MapWith m) {
-                return m;
+            if (a instanceof MapWith) {
+                return (MapWith) a;
             }
         }
         return null;

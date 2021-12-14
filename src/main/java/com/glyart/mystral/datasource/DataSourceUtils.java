@@ -39,7 +39,7 @@ public final class DataSourceUtils {
     @NotNull
     public static DataSource newDataSource(@NotNull Credentials credentials) throws DataSourceInitException {
         Preconditions.checkNotNull(credentials, "The credentials cannot be null.");
-        var factory = new HikariFactory();
+        HikariFactory factory = new HikariFactory();
         factory.setCredentials(credentials);
         try {
             return factory.newDataSource();
@@ -251,16 +251,18 @@ public final class DataSourceUtils {
             // Corresponding SQL types for JSR-310 / Joda-Time types, left up
             // to the caller to convert them (e.g. through a ConversionService).
             String typeName = requiredType.getSimpleName();
-            return switch (typeName) {
-                case "LocalDate" -> rs.getDate(index);
-                case "LocalTime" -> rs.getTime(index);
-                case "LocalDateTime" -> rs.getTimestamp(index);
-                default ->
-
-                        // Fall back to getObject without type specification, again
-                        // left up to the caller to convert the value if necessary.
-                        getResultSetValue(rs, index);
-            };
+            switch (typeName) {
+                case "LocalDate":
+                    return rs.getDate(index);
+                case "LocalTime":
+                    return rs.getTime(index);
+                case "LocalDateTime":
+                    return rs.getTimestamp(index);
+// Fall back to getObject without type specification, again
+// left up to the caller to convert the value if necessary.
+                default:
+                    return getResultSetValue(rs, index);
+            }
         }
 
         // Perform was-null check if necessary (for results that the JDBC driver returns as primitives).
@@ -292,10 +294,12 @@ public final class DataSourceUtils {
         if (obj != null) {
             className = obj.getClass().getName();
         }
-        if (obj instanceof Blob blob) {
+        if (obj instanceof Blob) {
+            Blob blob = (Blob) obj;
             obj = blob.getBytes(1, (int) blob.length());
         }
-        else if (obj instanceof Clob clob) {
+        else if (obj instanceof Clob) {
+            Clob clob = (Clob) obj;
             obj = clob.getSubString(1, (int) clob.length());
         }
         else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
@@ -319,10 +323,11 @@ public final class DataSourceUtils {
     }
 
     private static int toNumber(Object o) {
-        if (!(o instanceof Number number)) {
+        if (!(o instanceof Number)) {
             return Integer.MIN_VALUE;
         }
 
+        Number number = (Number) o;
         BigInteger bigInt = null;
         if (number instanceof BigInteger) {
             bigInt = (BigInteger) number;
