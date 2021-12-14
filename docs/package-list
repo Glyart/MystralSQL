@@ -1,3 +1,5 @@
+com.glyart.mystral.data
+com.glyart.mystral.data.support
 com.glyart.mystral.database
 com.glyart.mystral.datasource
 com.glyart.mystral.exceptions
