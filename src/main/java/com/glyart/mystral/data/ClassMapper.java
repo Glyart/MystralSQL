@@ -24,44 +24,8 @@ import java.util.Objects;
 
 /**
  * ResultSetRowMapper implementation that converts a row into a new instance of the specified mapped target class. <br>
- * <p>The mapped target class must be a top-level class and it must have a default or no-arg constructor. </p><br>
- * An optimal structure may be like this:
- * <pre>
- * {@code
- *   public class User {
- *
- *     private int id;
- *     private String name;
- *     private UUID uuid;
- *
- *     public int getId() {
- *         return id;
- *     }
- *
- *     public void setId(int id) {
- *         this.id = id;
- *     }
- *
- *     public String getName() {
- *         return name;
- *     }
- *
- *     @Name(columnName = "username") // this refers to the column name
- *     public void setName(String name) {
- *         this.name = name;
- *     }
- *
- *     public UUID getUuid() {
- *         return uuid;
- *     }
- *
- *     // ClassMapper will try to convert the value obtained from the database to the desired type.
- *     public void setUuid(@MapWith(StringToUUID.class) UUID uuid) {
- *         this.uuid = uuid;
- *     }
- *   }
- * }
- * </pre>
+ * <p>The mapped target class must be a top-level class and it must have a default or no-arg constructor.
+ * You can find an optimal structure <a href = https://github.com/Glyart/Mystral/wiki/Automatic-mappings>here</a>.</p><br>
  * <p>Column values are mapped based on matching the column name as obtained from result set meta-data to public setters for the corresponding properties.
  * If field names are different from column names, you can annotate the public setters with the {@link Name} annotation, and specify the column name.</p>
  * <br>
@@ -232,6 +196,10 @@ public class ClassMapper<T> implements ResultSetRowMapper<T> {
             for (PropertyDescriptor descriptor : descriptors) {
                 final Method method = descriptor.getWriteMethod();
                 if (method == null) {
+                    continue;
+                }
+                final Skip skip = method.getAnnotation(Skip.class);
+                if (skip != null) {
                     continue;
                 }
                 String propertyName = descriptor.getName();
