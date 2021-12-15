@@ -1,1 +1,0 @@
-cmd.exe /X /C ""C:\Program Files\Amazon Corretto\jdk1.8.0_302\jre\..\bin\javadoc.exe" @options @argfile"
